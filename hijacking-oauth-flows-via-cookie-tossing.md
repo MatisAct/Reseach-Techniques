@@ -2,12 +2,13 @@
 
 **Tác giả:** Elliot Ward  
 **Chia sẻ:**  
-Tìm hiểu về **tấn công Cookie Tossing**, một kỹ thuật ít được biết đến để chiếm quyền điều khiển luồng OAuth và thực hiện chiếm đoạt tài khoản tại các Nhà cung cấp Danh tính (IdPs). Khám phá tác động, ví dụ thực tế và cách bảo vệ ứng dụng bằng tiền tố cookie **__Host__**.
+Tìm hiểu về **tấn công Cookie Tossing**, một kỹ thuật ít được biết đến để chiếm quyền điều khiển luồng OAuth và thực hiện chiếm đoạt tài khoản tại các Nhà cung cấp Danh tính (IdPs). Khám phá tác động, ví dụ thực tế, cách thiết lập môi trường test và cách bảo vệ ứng dụng bằng tiền tố cookie **__Host__**.
 
 ## Nội dung bài viết
 - [Cookie Tossing là gì?](#cookie-tossing-là-gì)
 - [Khai thác Cookie Tossing](#khai-thác-cookie-tossing)
 - [Thăm lại GitPod](#thăm-lại-gitpod)
+- [Cấu hình môi trường test](#cấu-hình-môi-trường-test)
 - [Tiền tố cookie __Host__](#tiền-tố-cookie-__host__)
 
 ## Cookie Tossing là gì?
@@ -98,6 +99,96 @@ Khi nạn nhân truy cập URL, cookie của kẻ tấn công được thiết l
 ### Kết quả
 Lỗ hổng này được báo cáo cho GitPod vào ngày **26/06/2024** và được khắc phục vào ngày **01/07/2024** bằng cách sử dụng tiền tố cookie **__Host__**. Lỗ hổng được gán mã **CVE-2024-21583**.
 
+## Cấu hình môi trường test
+
+Để kiểm tra hoặc tái hiện tấn công **Cookie Tossing**, bạn có thể thiết lập một môi trường thử nghiệm cục bộ sử dụng **Python** với framework **Flask** để tạo server đơn giản với domain cha và subdomain. Dưới đây là hướng dẫn chi tiết:
+
+### Yêu cầu
+- **Python** (phiên bản 3.8 trở lên).
+- **pip** để cài đặt các gói.
+- Trình duyệt web (Chrome, Firefox, v.v.).
+- File cấu hình DNS cục bộ (`hosts`) để giả lập subdomain.
+
+### Các bước thiết lập
+
+1. **Cài đặt Python và Flask**:
+   - Cài Python từ [python.org](https://www.python.org).
+   - Tạo một thư mục dự án:
+     ```
+     mkdir cookie-tossing-test
+     cd cookie-tossing-test
+     pip install flask
+     ```
+
+2. **Tạo server đơn giản**:
+   - Tạo file `server.py` để mô phỏng một ứng dụng web với domain cha và subdomain:
+```python
+from flask import Flask, request, make_response
+
+app = Flask(__name__)
+
+# Route cho domain cha (example.com)
+@app.route('/')
+def home():
+    response = make_response('Domain cha: example.com')
+    response.set_cookie('session', 'parent-session', domain='.example.com', path='/', secure=True, httponly=True, samesite='Lax')
+    return response
+
+# Route cho subdomain (sub.example.com)
+@app.route('/sub')
+def sub():
+    response = make_response('Subdomain: sub.example.com')
+    response.set_cookie('session', 'attacker-session', domain='.example.com', path='/api', secure=True, httponly=True, samesite='Lax')
+    return response
+
+# Route mô phỏng API endpoint
+@app.route('/api')
+def api():
+    session = request.cookies.get('session', 'Không có session')
+    return f'API endpoint, session: {session}'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+```
+
+3. **Cấu hình DNS cục bộ**:
+   - Chỉnh sửa file `hosts` trên máy tính để giả lập domain và subdomain:
+     - Windows: `C:\Windows\System32\drivers\etc\hosts`
+     - macOS/Linux: `/etc/hosts`
+   - Thêm các dòng sau:
+     ```
+     127.0.0.1 example.com
+     127.0.0.1 sub.example.com
+     ```
+
+4. **Chạy server**:
+   - Chạy lệnh:
+     ```
+     python server.py
+     ```
+   - Truy cập:
+     - Domain cha: `http://example.com:5000`
+     - Subdomain: `http://sub.example.com:5000/sub`
+     - API endpoint: `http://example.com:5000/api`
+
+5. **Kiểm tra tấn công Cookie Tossing**:
+   - Truy cập `http://sub.example.com:5000/sub` để đặt cookie của kẻ tấn công (`attacker-session`) trên domain cha (`example.com`) với `Path=/api`.
+   - Truy cập `http://example.com:5000/api` để kiểm tra xem cookie nào được gửi. Nếu server trả về `API endpoint, session: attacker-session`, tấn công đã thành công.
+   - Quan sát rằng cookie của subdomain đã ghi đè cookie của domain cha cho endpoint `/api`.
+
+### Lưu ý
+- Môi trường này chỉ chạy trên HTTP (localhost), nên thuộc tính `secure=True` sẽ không hoạt động. Để kiểm tra đầy đủ, bạn cần thiết lập HTTPS cục bộ (sử dụng `mkcert` hoặc `OpenSSL`).
+- Để kiểm tra tác động của tiền tố `__Host__`, sửa cookie của domain cha trong `server.py` thành:
+  ```python
+  response.set_cookie('session', 'parent-session', path='/', httponly=True, secure=True, samesite='Lax')
+  response.headers.add('Set-Cookie', 'session=parent-session; __Host__')
+  ```
+  Sau đó, xác minh rằng subdomain không thể ghi đè cookie.
+
+### Công cụ đề xuất
+- **Postman** hoặc **cURL** để kiểm tra header và cookie.
+- Developer Tools của trình duyệt (tab Network) để xem cookie được gửi.
+
 ## Tiền tố cookie __Host__
 
 Tiền tố **__Host__** là giải pháp đơn giản để ngăn chặn Cookie Tossing. Khi sử dụng **__Host__**:
@@ -106,6 +197,6 @@ Tiền tố **__Host__** là giải pháp đơn giản để ngăn chặn Cookie
 
 ## Kết luận
 
-**Cookie Tossing** là một lỗ hổng độc đáo và thường bị bỏ qua, ảnh hưởng đến các ứng dụng không sử dụng tiền tố **__Host__**. Kỹ thuật này có thể bị khai thác để chiếm quyền điều khiển các yêu cầu nhạy cảm, đặc biệt trong các luồng phức tạp như OAuth, dẫn đến việc lộ dữ liệu hoặc cấp quyền truy cập trái phép. Việc sử dụng **__Host__** là một biện pháp bảo vệ hiệu quả, nhưng vẫn còn hiếm trong thực tế, khiến nhiều ứng dụng, đặc biệt là những ứng dụng sử dụng subdomain, dễ bị tấn công.
+**Cookie Tossing** là một lỗ hổng độc đáo và thường bị bỏ qua, ảnh hưởng đến các ứng dụng không sử dụng tiền tố **__Host__**. Kỹ thuật này có thể bị khai thác để chiếm quyền điều khiển các yêu cầu nhạy cảm, đặc biệt trong các luồng phức tạp như OAuth, dẫn đến việc lộ dữ liệu hoặc cấp quyền truy cập trái phép. Việc sử dụng **__Host__** là một biện pháp bảo vệ hiệu quả, nhưng vẫn còn hiếm trong thực tế, khiến nhiều ứng dụng, đặc biệt là những ứng dụng sử dụng subdomain, dễ bị tấn công. Môi trường test sử dụng Python/Flask ở trên giúp bạn hiểu rõ cách thức tấn công và cách bảo vệ.
 
 **Lưu ý:** Để biết thêm chi tiết về giá cả hoặc dịch vụ của xAI, vui lòng truy cập [x.ai](https://x.ai).
