@@ -81,7 +81,7 @@ Thuộc tính **Path** xác định các URL mà cookie áp dụng. Mặc địn
 - Tuy nhiên, nhiều API dựa trên JSON không sử dụng CSRF tokens, dựa vào **Same Origin Policy (SOP)** và **CORS**. Điều này khiến chúng dễ bị tấn công từ subdomain.
 - **SameSite** không bảo vệ chống lại Cookie Tossing vì subdomain được coi là cùng "site" theo định nghĩa của SameSite (kể cả với `Lax` hoặc `Strict`).
 
-## Thăm lại GitPod
+## GitPod
 
 **GitPod** là một môi trường phát triển đám mây (Cloud Development Environment - CDE) cho phép triển khai môi trường phát triển nhanh chóng. Các môi trường này được lưu trữ trên subdomain của `gitpod.io`, và người dùng có thể thực thi JavaScript trên các subdomain này.
 
