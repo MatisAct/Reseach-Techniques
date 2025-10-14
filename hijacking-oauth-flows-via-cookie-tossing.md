@@ -131,14 +131,14 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     response = make_response('Domain cha: example.com')
-    response.set_cookie('session', 'parent-session', domain='.example.com', path='/', secure=True, httponly=True, samesite='Lax')
+    response.set_cookie('session', 'parent-session', domain='.example.com', path='/', httponly=True, samesite='Lax')
     return response
 
 # Route cho subdomain (sub.example.com)
 @app.route('/sub')
 def sub():
-    response = make_response('Subdomain: sub.example.com')
-    response.set_cookie('session', 'attacker-session', domain='.example.com', path='/api', secure=True, httponly=True, samesite='Lax')
+    response = make_response('Subdomain: sub.example.com - Cookie attacker-session đã được thiết lập')
+    response.set_cookie('session', 'attacker-session', domain='.example.com', path='/api', httponly=True, samesite='Lax')
     return response
 
 # Route mô phỏng API endpoint
@@ -148,7 +148,7 @@ def api():
     return f'API endpoint, session: {session}'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 ```
 
 3. **Cấu hình DNS cục bộ**:
