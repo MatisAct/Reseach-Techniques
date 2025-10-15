@@ -199,33 +199,58 @@ if __name__ == '__main__':
      - Check endpoint: `http://example.com:5000/check`
 
 5. **Kiểm tra tấn công Cookie Tossing thông qua XSS**:
+   - Trước khi thực thi
+     <img width="434" height="104" alt="image" src="https://github.com/user-attachments/assets/90fe546e-a90f-49b5-81a5-03d3f0cf88d1" />
    - **Khai thác XSS để đặt cookie**:
-     - Truy cập URL sau để chèn mã JavaScript độc hại qua lỗ hổng XSS:
+   - Truy cập URL sau để chèn mã JavaScript độc hại qua lỗ hổng XSS:
        ```
        http://sub.example.com:5000/sub/xss?input=<script>document.cookie="session=attacker-xss-session; domain=.example.com; path=/api; samesite=lax";</script>
        ```
      - Mã JavaScript này sẽ chạy trong trình duyệt của nạn nhân, thiết lập cookie `session=attacker-xss-session` với `Domain=.example.com` và `Path=/api`.
    - **Xác minh cookie**:
-     - Mở Developer Tools trong trình duyệt (tab Application > Cookies) để kiểm tra xem cookie `session=attacker-xss-session` đã được thiết lập cho `example.com` chưa.
-   - **Kiểm tra tấn công**:
-     - Truy cập `http://example.com:5000/api`. Nếu server trả về `API endpoint, session: attacker-xss-session`, tấn công Cookie Tossing qua XSS đã thành công, vì cookie từ XSS đã ghi đè cookie của domain cha cho endpoint `/api`.
+   - Mở Developer Tools trong trình duyệt (tab Application > Cookies) để kiểm tra xem cookie `session=attacker-xss-session` đã được thiết lập cho `example.com` chưa.
+     <img width="1684" height="197" alt="image" src="https://github.com/user-attachments/assets/b9217793-215e-4915-a762-27f667a68358" />
 
-6. **Kiểm tra tấn công Cookie Tossing thông qua route /sub**:
+   - **Kiểm tra tấn công**:
+   - Truy cập `http://example.com:5000/api`. Nếu server trả về `API endpoint, session: attacker-xss-session`, tấn công Cookie Tossing qua XSS đã thành công, vì cookie từ XSS đã ghi đè cookie của domain cha cho endpoint `/api`.
+     
+   - Sau khi chạy XSS
+     <img width="479" height="168" alt="image" src="https://github.com/user-attachments/assets/7e97b073-7885-4574-accd-5b55aef92572" />
+
+
+
+7. **Kiểm tra tấn công Cookie Tossing thông qua route /sub**:
    - Truy cập `http://sub.example.com:5000/sub`. Bạn sẽ thấy thông báo: `Subdomain: sub.example.com - Cookie attacker-session đã được thiết lập`.
    - Mở Developer Tools (tab Application > Cookies) để xác minh rằng cookie `session=attacker-session` đã được thiết lập với `Domain=.example.com` và `Path=/api`.
    - Truy cập `http://example.com:5000/api`. Nếu server trả về `API endpoint, session: attacker-session`, tấn công Cookie Tossing đã thành công.
 
-7. **Kiểm tra ghi đè cookie khi root domain đã thiết lập cookie**:
+8. **Kiểm tra ghi đè cookie khi root domain đã thiết lập cookie**:
    - **Bước 1: Thiết lập cookie từ root domain**:
      - Truy cập `http://example.com:5000` để thiết lập cookie `session=parent-session` với `Domain=.example.com` và `Path=/`.
      - Kiểm tra trong Developer Tools (tab Application > Cookies) để xác minh cookie `session=parent-session` đã được thiết lập.
+     - 
+       <img width="1422" height="227" alt="image" src="https://github.com/user-attachments/assets/ee01f6ac-c146-44b5-9960-4deab6c5f824" />
+
    - **Bước 2: Thử ghi đè từ subdomain với Path cụ thể hơn**:
      - Truy cập `http://sub.example.com:5000/sub` để thiết lập cookie `session=attacker-session` với `Path=/api`.
      - Truy cập `http://example.com:5000/api`. Server sẽ trả về `API endpoint, session: attacker-session`, vì cookie với `Path=/api` được ưu tiên hơn `Path=/` cho endpoint `/api`.
+       
+       <img width="576" height="148" alt="image" src="https://github.com/user-attachments/assets/c3e882bd-bfb9-4bcb-8c6e-93fa6e3a7c68" />
+       
      - Truy cập `http://example.com:5000/check`. Server sẽ trả về `Check endpoint, session: parent-session`, vì endpoint `/check` không nằm trong `Path=/api`, nên cookie `parent-session` với `Path=/` được sử dụng.
+       
+       <img width="464" height="114" alt="image" src="https://github.com/user-attachments/assets/74e3dfd3-dfd5-45cf-8feb-c91781b0b956" />
+
+
    - **Bước 3: Thử ghi đè từ subdomain với cùng Path=/**:
-     - Truy cập `http://sub.example.com:5000/override` để thiết lập cookie `session=override-session` với `Path=/`.
+     - Truy cập `http://sub.example.com:5000/sub/override` để thiết lập cookie `session=override-session` với `Path=/`.
+    
+       <img width="661" height="131" alt="image" src="https://github.com/user-attachments/assets/6ce48234-4ccc-46b9-a75c-4e25c96d5040" />
+
      - Truy cập `http://example.com:5000/check`. Server sẽ trả về `Check endpoint, session: override-session`, vì cookie `override-session` được thiết lập sau cùng và có cùng `Path=/` nên ghi đè cookie `parent-session`.
+
+       <img width="524" height="144" alt="image" src="https://github.com/user-attachments/assets/66c5f3d2-fb72-4f25-8dd8-9fc3711c313d" />
+
    - **Bước 4: Thử ghi đè qua XSS**:
      - Truy cập:
        ```
