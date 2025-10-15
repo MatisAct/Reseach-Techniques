@@ -81,7 +81,7 @@ Thuộc tính **Path** xác định các URL mà cookie áp dụng. Mặc địn
 - Tuy nhiên, nhiều API dựa trên JSON không sử dụng CSRF tokens, dựa vào **Same Origin Policy (SOP)** và **CORS**. Điều này khiến chúng dễ bị tấn công từ subdomain.
 - **SameSite** không bảo vệ chống lại Cookie Tossing vì subdomain được coi là cùng "site" theo định nghĩa của SameSite (kể cả với `Lax` hoặc `Strict`).
 
-## Thăm lại GitPod
+##  GitPod
 
 **GitPod** là một môi trường phát triển đám mây (Cloud Development Environment - CDE) cho phép triển khai môi trường phát triển nhanh chóng. Các môi trường này được lưu trữ trên subdomain của `gitpod.io`, và người dùng có thể thực thi JavaScript trên các subdomain này.
 
@@ -290,4 +290,3 @@ Tiền tố **__Host__** là giải pháp đơn giản để ngăn chặn Cookie
 
 **Cookie Tossing** là một lỗ hổng độc đáo và thường bị bỏ qua, ảnh hưởng đến các ứng dụng không sử dụng tiền tố **__Host__**. Kỹ thuật này có thể bị khai thác để chiếm quyền điều khiển các yêu cầu nhạy cảm, đặc biệt trong các luồng phức tạp như OAuth, dẫn đến việc lộ dữ liệu hoặc cấp quyền truy cập trái phép. Lỗ hổng XSS làm tăng mức độ nguy hiểm của Cookie Tossing bằng cách cho phép kẻ tấn công chèn mã JavaScript để đặt cookie độc hại. Môi trường test sử dụng Python/Flask ở trên minh họa rõ cách subdomain có thể ghi đè cookie của root domain (khi đã được thiết lập trước) bằng cách sử dụng `Path` cụ thể hơn hoặc cùng `Path` với thời gian thiết lập mới hơn, cũng như cách bảo vệ bằng tiền tố `__Host__`.
 
-**Lưu ý:** Để biết thêm chi tiết về giá cả hoặc dịch vụ của xAI, vui lòng truy cập [x.ai](https://x.ai).
