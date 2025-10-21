@@ -322,3 +322,10 @@ Chiếm quyền tài khoản thành công
 - Implement PKCE để bảo vệ `authorization code`
 
 **Lưu ý**: Toàn bộ cuộc tấn công diễn ra trong vài giây và hoàn toàn vô hình với người dùng cuối!
+
+
+
+<img width="1508" height="357" alt="image" src="https://github.com/user-attachments/assets/7fb6f976-2659-4192-bf7a-986644abea29" />
+
+<img width="1570" height="392" alt="image" src="https://github.com/user-attachments/assets/5ec2c198-b109-4d8e-ade2-79db4d0d30a7" />
+<img width="1508" height="348" alt="image" src="https://github.com/user-attachments/assets/d0ccc0c7-1aef-4b8b-9361-a1adec35aaec" />
