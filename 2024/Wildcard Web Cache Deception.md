@@ -3,6 +3,7 @@
 ## Tóm Tắt
 
 Lỗ hổng "wildcard" web cache deception trong ChatGPT (2024) cho phép kẻ tấn công chiếm quyền tài khoản bằng cách khai thác sự không đồng bộ trong phân tích URL giữa CDN (Cloudflare) và máy chủ gốc. Sử dụng path traversal confusion (%2F..%2F), kẻ tấn công lưu trữ token xác thực từ endpoint nhạy cảm (/api/auth/session) trong cache, truy xuất để kiểm soát tài khoản. Lỗ hổng được vá sau khi báo cáo, nhưng nhấn mạnh rủi ro từ quy tắc cache lỏng lẻo.
+<img width="802" height="847" alt="image" src="https://github.com/user-attachments/assets/6b4e50e1-72df-42b7-b43b-7efbad921943" />
 
 ## Chi Tiết Lỗ Hổng
 
