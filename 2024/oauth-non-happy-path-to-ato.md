@@ -307,6 +307,8 @@ attacker-malicious-site.com#tokens (attacker đánh chặn)
     ↓ (attacker sử dụng tokens)
 Chiếm quyền tài khoản thành công
 ```
+<img width="1222" height="864" alt="image" src="https://github.com/user-attachments/assets/113a2a85-8bb9-43ef-999b-564906bf5f0d" />
+<img width="1458" height="564" alt="image" src="https://github.com/user-attachments/assets/1b811564-ede3-442a-b291-ad105fba2d8c" />
 
 #### Điểm Yếu của App Bị Tấn công
 - Không validate `response_type` - chấp nhận mọi giá trị
